@@ -29,8 +29,7 @@ RigDef.Dir.VStimLog                        = 'C:\Users\Arbora\Documents\MATLAB\'
 RigDef.Dir.vTrackSettings                  = 'C:\Users\Arbora\Documents\MATLAB\virtualTrack\Settings\';
 RigDef.Dir.Mouse                           = 'C:\Users\Arbora\Documents\MATLAB\Mouse\'; %'Z:\Arbora\Documents\MATLAB\Mouse\';
 RigDef.Dir.vTrackDataLocal                 = 'C:\Users\Arbora\Documents\MATLAB\RunLogs\';
-RigDef.Dir.vTrackData                      = 'Z:\Arbora\Documents\MATLAB\RunLogs\';% %server 'C:\Users\Arbora\Documents\MATLAB\RunLogs\'; %
-
+RigDef.Dir.vTrackData                      = 'C:\Users\Arbora\Documents\MATLAB\RunLogs\'; %'Z:\Arbora\Documents\MATLAB\RunLogs\';% %server 
 RigDef.Dir.CodeRoot                        = 'C:\Users\Arbora\Documents\MATLAB\';
 RigDef.Dir.Icons                           = [RigDef.Dir.CodeRoot, 'GuiTools\Icons\'];
 

@@ -4,7 +4,7 @@
 % 
 % tmp=mkGrating(obj.size,obj.background_pix_val,obj.angle);
 
-function tmp=mkGrating(size,background_pix_val,angle,contrast)
+function tmp=mkGrating(sz,background_pix_val,angle,contrast)
 
 %AR on 1/14/2014
 
@@ -36,11 +36,24 @@ phase_v=0:step:(step*(nsteps-1));
 phase=phase_v(randi(length(phase_v))); %AR on 2/20/15
 %phase=0;
 
-[x,z]=meshgrid(-size/2:1:size/2); %size = obj.size +1;
-lum_y=lum_b+(sin(2*pi*sf*(x-phase))*inc.*Circle(size/2+0.5)); %.*exp(-((x/150).^2)-((z/150).^2)));
+% round patch
+% [x,z]=meshgrid(-sz/2:1:sz/2); %sz = obj.size +1;
+% lum_y=lum_b+(sin(2*pi*sf*(x-phase))*inc.*Circle(sz/2+0.5)); %.*exp(-((x/150).^2)-((z/150).^2)));
+
+% square, need to make a larger mesh to rotate and then truncate
+% 08/11/2017 by PSX
+m_sz = sz*2;
+[x,z]=meshgrid(-m_sz:1:m_sz); %sz = obj.size +1; 
+lum_y=lum_b+(sin(2*pi*sf*(x-phase))*inc);
+
 y=exp(log(lum_y/sDef.a)/sDef.b);
 
 tmp=imrotate(y,angle);
+% truncate the size to be our target size by taking the center region
+idx = int16((size(tmp,1)-sz)/2);
+idy = int16((size(tmp,2)-sz)/2);
+tmp = tmp(idx:idx+sz, idy:idy+sz);
+
 tmp(tmp==0)=gray;
 
 end

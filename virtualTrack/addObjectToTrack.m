@@ -26,7 +26,7 @@ switch obj.type
             end
             tmp=mkGrating(obj.size,obj.background_pix_val,obj.angle,obj.contrast);
             add_pix = (size(tmp,1) - obj.size(1))/2;
-            rect = round(obj.rect + [-1 -1 1 1]*add_pix);    % ** to do: store updated obj.rect
+            rect = round(obj.rect + [-1 -1 1 1]*add_pix);    % ** to do: store updated obj.rect           
             tmp = double(tmp);
         end
         

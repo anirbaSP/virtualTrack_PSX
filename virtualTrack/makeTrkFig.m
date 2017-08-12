@@ -24,7 +24,7 @@ end
 rdef = RigDefs;
 sdef = screenDefs;
 
-% Make track matrix
+% Make track matrix-
 trk_m = makeTrkMat(trk);
 
 % Scale image

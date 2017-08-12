@@ -81,7 +81,7 @@ session_active = 1;
 putvar(run);
 
 try
-    HideCursor
+    % HideCursor
     while session_active
         
         % Turn on dark background

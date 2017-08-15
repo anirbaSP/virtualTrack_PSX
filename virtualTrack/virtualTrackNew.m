@@ -579,6 +579,12 @@ function run = computeContingencies(run,ai)
 
 c_obj_ind = run.p_mat(5,run.p);
 obj = run.trial(run.trial_number).trk.obj(c_obj_ind);
+% Add by PSX, for any comparison to the previous object
+if c_obj_ind < size(run.trial(run.trial_number).p1,2)
+    ind_last = c_obj_ind +1;
+else ind_last = 1;
+end
+obj_last = run.trial(run.trial_number).trk.obj(ind_last);
 
 % Determine LED status
 if run.use_led && ~run.freeze_state;
@@ -597,7 +603,16 @@ if run.distance-run.distance_last_reward > 0.7*run.trial(run.trial_number).trk.l
     run.trial(run.trial_number).trk.obj(c_obj_ind) = obj;
 end
 
-if obj.target && obj.reward_available && run.p <= obj.target_zone(1) && run.p >= obj.target_zone(2)
+% if obj.target == 0 && obj_last.target == 1
+%     fprintf(['\n obj.target is ' num2str(obj.target) '; '])
+%     fprintf(['obj_last.target is ' num2str(obj.target) '; '])
+%     %fprintf(['obj.target ~= obj_last.target is ' num2str(~isequal(obj.target, obj_last.target))])
+%     obj.target == obj_last.target
+%     fprintf(['\n obj.target class is ' class(obj.target) '; '])
+%     fprintf(['obj_last.target class is ' class(obj.target)])
+% end
+
+if (obj.angle ~= obj_last.angle) && obj.reward_available && run.p <= obj.target_zone(1) && run.p >= obj.target_zone(2)
     run.time_in_reward_zone = run.time_in_reward_zone + toc(run.tic_hold_time);
 else
     run.time_in_reward_zone = 0;
@@ -616,7 +631,7 @@ end
 
 time_hold = run.trial(run.trial_number).time_hold_for_reward;
 
-if obj.target && obj.reward_available && run.time_in_reward_zone > time_hold
+if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_zone > time_hold
     %     run.time_in_reward_zone
     %     tic
     %putvalue(run.lick_port.parentuddobj,1,1);

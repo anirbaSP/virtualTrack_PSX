@@ -46,7 +46,7 @@ run.led_state = [0 0];
 run.use_led = str2num(getFromTable(vtrack_table,'LED'));
 
 %AR added this
-run.freeze_flag=1;
+run.freeze_flag=0;
 run.freeze_state=0;
 run.pfreeze=0;
 

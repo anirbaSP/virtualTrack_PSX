@@ -394,20 +394,25 @@ if ~isfield(run,'w')
     Screen('Preference', 'VisualDebuglevel', 1);
     Screen('Preference', 'SkipSyncTests', 2 );
     Screen('Preference', 'Verbosity', 0);
-    [run.w(1),wRect] = Screen(run.sdef.screenNum,'OpenWindow',run.trial(run.trial_number).background_pix_val);
+    [run.w(1),wRect] = Screen(run.sdef.screenNum(1),'OpenWindow',run.trial(run.trial_number).background_pix_val);
     Screen('Preference', 'VisualDebuglevel', 1);
     Screen('Preference', 'SkipSyncTests', 2 );
     Screen('Preference', 'Verbosity', 0);
-%     [run.w(2),wRect2] = Screen(3,'OpenWindow',0);
+    [run.w(2),wRect2] = Screen(run.sdef.screenNum2,'OpenWindow',run.trial(run.trial_number).background_pix_val);
     priorityLevel = MaxPriority(run.w(1));
     Priority(priorityLevel);
 %     Screen('FillRect',run.w(2),0,[0 0 0 0]);
 end
 
 Screen('FillRect',run.w(1),run.trial(run.trial_number).background_pix_val);
-% Screen('FillRect',run.w(2),0,[0 0 0 0]);
+Screen('FillRect',run.w(2),run.trial(run.trial_number).background_pix_val);
 Screen('Flip',run.w(1));
-% Screen('Flip',run.w(2));
+Screen('Flip',run.w(2));
+% horizontally flip w(2)
+[xc, yc] = RectCenter(wRect2);
+Screen('glTranslate', run.w(2), xc, yc, 0);
+Screen('glScale', run.w(2), -1, 1, 1);
+Screen('glTranslate', run.w(2), -xc, -yc,0);
 
 function displayTrack(run)
 p_mat = run.p_mat;
@@ -418,8 +423,10 @@ tmp = run.trial(run.trial_number).trk;
 c = computeCoordinates(p,p_mat,run.sdef.width,tmp.tile_width,tmp.height);
 for i = 1:3
     Screen('DrawTexture',run.w(1),run.tx(tile_ind(i)),c{i,1},c{i,2});
+    Screen('DrawTexture',run.w(2),run.tx(tile_ind(i)),c{i,1},c{i,2});
 end
 Screen('Flip',run.w(1));
+Screen('Flip',run.w(2));
 
 function [run,update_flag] = computePosition(ai,run)
 

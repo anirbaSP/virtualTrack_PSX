@@ -394,11 +394,11 @@ if ~isfield(run,'w')
     Screen('Preference', 'VisualDebuglevel', 1);
     Screen('Preference', 'SkipSyncTests', 2 );
     Screen('Preference', 'Verbosity', 0);
-    [run.w(1),wRect] = Screen(run.sdef.screenNum(1),'OpenWindow',run.trial(run.trial_number).background_pix_val);
+    [run.w(1),run.wRect{1}] = Screen(run.sdef.screenNum(1),'OpenWindow',run.trial(run.trial_number).background_pix_val);
     Screen('Preference', 'VisualDebuglevel', 1);
     Screen('Preference', 'SkipSyncTests', 2 );
     Screen('Preference', 'Verbosity', 0);
-    [run.w(2),wRect2] = Screen(run.sdef.screenNum2,'OpenWindow',run.trial(run.trial_number).background_pix_val);
+    [run.w(2),run.wRect{2}] = Screen(run.sdef.screenNum2,'OpenWindow',run.trial(run.trial_number).background_pix_val);
     priorityLevel = MaxPriority(run.w(1));
     Priority(priorityLevel);
 %     Screen('FillRect',run.w(2),0,[0 0 0 0]);
@@ -409,7 +409,7 @@ Screen('FillRect',run.w(2),run.trial(run.trial_number).background_pix_val);
 Screen('Flip',run.w(1));
 Screen('Flip',run.w(2));
 % horizontally flip w(2)
-[xc, yc] = RectCenter(wRect2);
+[xc, yc] = RectCenter(run.wRect{2});
 Screen('glTranslate', run.w(2), xc, yc, 0);
 Screen('glScale', run.w(2), -1, 1, 1);
 Screen('glTranslate', run.w(2), -xc, -yc,0);

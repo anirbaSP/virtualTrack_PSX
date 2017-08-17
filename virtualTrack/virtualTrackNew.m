@@ -638,7 +638,9 @@ end
 
 time_hold = run.trial(run.trial_number).time_hold_for_reward;
 
-if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_zone > time_hold
+lick_flag = sum(run.l_data > run.lick_thr) > 10; % run.l_data has 60 data points (to-be-confirmed), sampling rate 1000, so lick for at least 10ms
+
+if (obj.angle ~= obj_last.angle) && obj.reward_available && lick_flag %run.time_in_reward_zone > time_hold
     %     run.time_in_reward_zone
     %     tic
     %putvalue(run.lick_port.parentuddobj,1,1);

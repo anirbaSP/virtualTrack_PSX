@@ -401,18 +401,19 @@ if ~isfield(run,'w')
     [run.w(2),run.wRect{2}] = Screen(run.sdef.screenNum2,'OpenWindow',run.trial(run.trial_number).background_pix_val);
     priorityLevel = MaxPriority(run.w(1));
     Priority(priorityLevel);
-%     Screen('FillRect',run.w(2),0,[0 0 0 0]);
+    %Screen('FillRect',run.w(2),0,[0 0 0 0])
+    % added by PSX 08/2017
+    % horizontally flip w(2)
+    [xc, yc] = RectCenter(run.wRect{2});
+    Screen('glTranslate', run.w(2), xc, yc, 0);
+    Screen('glScale', run.w(2), -1, 1, 1);
+    Screen('glTranslate', run.w(2), -xc, -yc,0);
 end
 
 Screen('FillRect',run.w(1),run.trial(run.trial_number).background_pix_val);
 Screen('FillRect',run.w(2),run.trial(run.trial_number).background_pix_val);
 Screen('Flip',run.w(1));
 Screen('Flip',run.w(2));
-% horizontally flip w(2)
-[xc, yc] = RectCenter(run.wRect{2});
-Screen('glTranslate', run.w(2), xc, yc, 0);
-Screen('glScale', run.w(2), -1, 1, 1);
-Screen('glTranslate', run.w(2), -xc, -yc,0);
 
 function displayTrack(run)
 p_mat = run.p_mat;
@@ -640,7 +641,7 @@ time_hold = run.trial(run.trial_number).time_hold_for_reward;
 
 lick_flag = sum(run.l_data > run.lick_thr) > 10; % run.l_data has 60 data points (to-be-confirmed), sampling rate 1000, so lick for at least 10ms
 
-if (obj.angle ~= obj_last.angle) && obj.reward_available && lick_flag %run.time_in_reward_zone > time_hold
+if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_zone > time_hold %lick_flag %
     %     run.time_in_reward_zone
     %     tic
     %putvalue(run.lick_port.parentuddobj,1,1);

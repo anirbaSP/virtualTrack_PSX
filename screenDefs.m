@@ -5,8 +5,8 @@ function sDef = screenDefs()
 %
 
 % Created: SRO - 9/24/11
-sDef.screenNum = 1;
-sDef.screenNum2 = 3;
+sDef.screenNum = 2;
+sDef.screenNum2 = 1;
 sDef.width = 1920;
 sDef.width_inches = 20.5;
 sDef.height = 1080;

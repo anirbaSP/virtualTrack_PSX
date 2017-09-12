@@ -45,7 +45,9 @@ run.track_table = vtrack_table;
 run.led_state = [0 0];
 run.use_led = str2num(getFromTable(vtrack_table,'LED'));
 
-run.lick_thr = 1; %1V % added by PSX 08/2017
+% added by PSX 08/2017
+run.lick_thr = 1; %1V 
+run.runningBall = true;
 
 %AR added this
 run.freeze_flag=0;

@@ -473,7 +473,11 @@ else
     run.n=n;
     run.t=t;
     
-    d = d(:,1);  %  Chn0/Ind1 is absolute position encoder
+    if run.runningBall
+        d = getBallPosition(run);
+    else
+        d = d(:,1);  %  Chn0/Ind1 is absolute position encoder
+    end
     
     % Compute distance traveled in pixels
     d = diff(d);
@@ -813,7 +817,13 @@ if isfield(run,'u');
     fclose(run.u);
     delete(run.u);
     run = rmfield(run,'u');
-    run=rmfield(run,'lh')
+    run = rmfield(run,'lh');
+end
+
+if isfield(run,'u_ball');
+    fclose(run.u_ball);
+    delete(run.u_ball);
+    run = rmfield(run,'u_ball');
 end
 
 % Delete parallel port dio
@@ -915,6 +925,53 @@ if run.parallel_port_trigger;
     end
     
     run.u = u;
+end
+
+% added by PSX 09/2017
+if run.runningBall
+    rdef = RigDefs;
+    if ~isempty(rdef.rpi_IP)
+        % Look for valid udp
+        bnewudp = 0;
+        props = {'Tag','Type'};
+        vals = {'udp_ball_conditions','udp'};
+        u_ball = instrfindall(props,vals);
+        delete(u_ball);
+        if ~isempty(u_ball)
+            if ~isvalid(u_ball);
+                delete(u_ball);
+                bnewudp = 1;
+            end
+        else
+            bnewudp = 1;
+        end
+        
+        % If valid upd doesn't exist create it
+        if bnewudp
+            u_ball = udp(rdef.rpi_IP,9093,'LocalPort',9094);
+            u_ball.Tag = 'udp_ball_conditions'; % Tag for finding object later
+        end
+        
+        if ~isequal(u_ball.Status,'open');
+            fopen(u_ball);
+            fprintf(u_ball, 'start'); % send the start command
+            
+%         rpiEndPoint = new IPEndPoint(IPAddress.Parse(rpi.Split(';')[1]), int.Parse(rpi.Split(';')[0]));
+% 
+% 		//rpiEndPoint = new IPEndPoint(IPAddress.Parse("169.230.188.46"),8888);
+% 		client = new UdpClient(port);
+% 		string text = "start";
+% 		byte[] b = Encoding.ASCII.GetBytes (text);
+% 		client.Send(b,b.Length,rpiEndPoint);
+%         receiveThread = new Thread(
+%             new ThreadStart(ReceiveData));
+%         receiveThread.IsBackground = true;
+%         receiveThread.Start();
+             
+        end
+    end
+    
+    run.u_ball = u_ball;
 end
 
 function run = syncDaqPulse(run)

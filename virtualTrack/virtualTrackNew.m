@@ -474,13 +474,13 @@ else
     run.t=t;
     
     if run.runningBall
-        d = getBallPosition(run);
-    else
+        d = getBallMovement(run)
+    else % running disk
         d = d(:,1);  %  Chn0/Ind1 is absolute position encoder
+            % Compute distance traveled in pixels
+        d = diff(d);
     end
     
-    % Compute distance traveled in pixels
-    d = diff(d);
     d(abs(d) > discontinuity_thresh) = NaN;
     d = nansum(d);
     d = d*run.cm_per_volt*run.pixels_per_cm*gain;

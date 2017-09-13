@@ -2,12 +2,28 @@ function d = getBallPosition(run)
 % This function is to get the absolute position of the running ball sending
 % from the Raspberry Pi through udp
 
-% get udp line
-data = fscanf(run.u_ball)
+% get udp line and read udp data
+data = fscanf(run.u_ball);
 
-d = data(2);
+% decode udp data and get the ball position
+mouseInput = decodeMessage(data);
 
-% read udp data
+d = computeDisplacement(mouseInput);
+
+function mouseInput = decodeMessage(data)
+mouseInput.channel = uint16(data(2));
+mouseInput.dx = int8(data(3));
+mouseInput.dy = int8(data(4));
+
+function d = computeDisplacement(mouseInput)
+if mouseInput.channel == 1
+    mouse1.dx = mouseInput.dx;
+    mouse1.dy = mouseInput.dy;
+else if mouseInput.channel == 2
+        mouse2.dx = mouseInput.dx;
+        mouse2.dy = mouseInput.dy;
+    end
+end
 
 % decode udp data and get the ball position
 

@@ -812,6 +812,15 @@ stop(ai)
 delete(ai);
 delete(run.lh);
 
+% add by PSX 09/2017 for running ball
+if run.runningBall
+    fwrite(run.u_ball, 'stop');
+end
+if isfield(run,'u_ball');
+    fclose(run.u_ball);
+    delete(run.u_ball);
+    run = rmfield(run,'u_ball');
+end
 % Delete udp object
 if isfield(run,'u');
     fclose(run.u);
@@ -948,13 +957,13 @@ if run.runningBall
         
         % If valid upd doesn't exist create it
         if bnewudp
-            u_ball = udp(rdef.rpi_IP,9093,'LocalPort',9094);
+            u_ball = udp(rdef.rpi_IP,8888,'LocalPort',9094);
             u_ball.Tag = 'udp_ball_conditions'; % Tag for finding object later
         end
         
         if ~isequal(u_ball.Status,'open');
             fopen(u_ball);
-            fprintf(u_ball, 'start'); % send the start command
+            fwrite(u_ball, 'start'); % send the start command
             
 %         rpiEndPoint = new IPEndPoint(IPAddress.Parse(rpi.Split(';')[1]), int.Parse(rpi.Split(';')[0]));
 % 

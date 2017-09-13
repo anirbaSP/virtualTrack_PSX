@@ -7,7 +7,7 @@ function RigDef = RigDefs()
 % Computer IP addresses
 RigDef.DAQPC_IP                            = '132.239.203.238';
 RigDef.StimPC_IP                           = '132.239.203.238'; %'132.239.203.98'; %AR on 3/29/15
-RigDef.rpi_IP                              = '127.0.0.1'; % PSX on 08/2017, 8888 or 9093 remote, 9094 local
+RigDef.rpi_IP                              = '192.168.137.206'; % PSX on 08/2017, 8888 or 9093 remote, 9094 local
 
 % User equipment
 RigDef.equipment.amp                       = 'A-M Systems 3600';

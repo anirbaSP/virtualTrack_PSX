@@ -38,13 +38,20 @@ for i = 1:length(idx)
     thisChannel = uint16(data(idx(i)+1));
     dx = int8(data(idx(i)+2));
     dy = uint8(data(idx(i)+3));
-    if dy == 255
-    a = de2bi(dy)
-    b = bi2de(de2bi(dy), 'left-msb')
-    c = uint8(bi2de(de2bi(dy), 'left-msb'))
-    e = typecast(uint8(bi2de(de2bi(dy), 'left-msb')), 'int8')
+   
+    if bitand(dy, 128) == 128
+        dy = bitand(dy, 127);
+        dy = bitxor(dy, 127)+1;
+        dy = -dy;
     end
-    dy = typecast(uint8(bi2de(de2bi(dy), 'left-msb')), 'int8');
+       
+%     if dy == 255
+%     a = de2bi(dy)
+%     b = bi2de(de2bi(dy), 'left-msb')
+%     c = uint8(bi2de(de2bi(dy), 'left-msb'))
+%     e = typecast(uint8(bi2de(de2bi(dy), 'left-msb')), 'int8')
+%     end
+%     dy = typecast(uint8(bi2de(de2bi(dy), 'left-msb')), 'int8');
     switch thisChannel
         case 1
             mouse1.dx = [mouse1.dx dx];

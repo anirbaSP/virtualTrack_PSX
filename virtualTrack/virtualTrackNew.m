@@ -474,16 +474,17 @@ else
     run.t=t;
     
     if run.runningBall
-        d = getBallMovement(run)
+        d = getBallMovement(run);
+        d = sum(d)/8*gain;
     else % running disk
         d = d(:,1);  %  Chn0/Ind1 is absolute position encoder
             % Compute distance traveled in pixels
         d = diff(d);
-    end
     
     d(abs(d) > discontinuity_thresh) = NaN;
     d = nansum(d);
     d = d*run.cm_per_volt*run.pixels_per_cm*gain;
+    end
      
     %run.p_raw is raw position, while run.p controls stimulus. These are
     %different if stimulus freezes
@@ -814,7 +815,7 @@ delete(run.lh);
 
 % add by PSX 09/2017 for running ball
 if run.runningBall
-    fwrite(run.u_ball, 'stop');
+    fprintf(run.u_ball, '%s', 'stop');
 end
 if isfield(run,'u_ball');
     fclose(run.u_ball);
@@ -957,13 +958,13 @@ if run.runningBall
         
         % If valid upd doesn't exist create it
         if bnewudp
-            u_ball = udp(rdef.rpi_IP,8888,'LocalPort',9094);
+            u_ball = udp(rdef.rpi_IP,8888,'LocalPort',9094,'timeout', 0.0001, 'DatagramTerminateMode','off','timeout',0.001); %,'inputbuffersize',1200,'outputbuffersize',1200);
             u_ball.Tag = 'udp_ball_conditions'; % Tag for finding object later
         end
         
         if ~isequal(u_ball.Status,'open');
             fopen(u_ball);
-            fwrite(u_ball, 'start'); % send the start command
+            fprintf(u_ball, '%s', 'start'); % send the start command
             
 %         rpiEndPoint = new IPEndPoint(IPAddress.Parse(rpi.Split(';')[1]), int.Parse(rpi.Split(';')[0]));
 % 
@@ -976,8 +977,7 @@ if run.runningBall
 %             new ThreadStart(ReceiveData));
 %         receiveThread.IsBackground = true;
 %         receiveThread.Start();
-             
-        end
+       end
     end
     
     run.u_ball = u_ball;

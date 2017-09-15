@@ -4,9 +4,13 @@ function d = getBallMovement(run)
 
 % Written by PSX 09/2017
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-warning off
 % get udp line and read udp data
-data = fscanf(run.u_ball);
+data = [];
+udpStart = tic;
+while get(run.u_ball, 'BytesAvailable') > 3
+    tmp = fscanf(run.u_ball);
+    data = [data tmp];
+end
 
 % decode udp data for movement detected on each mouse, current support 2
 % mice, can add when necessay
@@ -17,41 +21,26 @@ d = computeDisplacement(mouse1, mouse2);
 end
 
 function [mouse1, mouse2] = decodeMessage(data)
-% incase there are incomplete package due to the udp send/receive timing,
-% make sure the data contain complete packet first
 mouse1.dx = [];
 mouse1.dy = [];
 mouse2.dx = [];
 mouse2.dy = [];
 
+% incase there are incomplete package due to the udp send/receive timing,
+% make sure the data contain complete packet first
 idx = strfind(data, 'M');
-
 if isempty(idx)
     return
 end
-
 if idx(end)+3 > length(data)
     idx(end) = [];
 end
 
 for i = 1:length(idx)
     thisChannel = uint16(data(idx(i)+1));
-    dx = int8(data(idx(i)+2));
-    dy = uint8(data(idx(i)+3));
-   
-    if bitand(dy, 128) == 128
-        dy = bitand(dy, 127);
-        dy = bitxor(dy, 127)+1;
-        dy = -dy;
-    end
-       
-%     if dy == 255
-%     a = de2bi(dy)
-%     b = bi2de(de2bi(dy), 'left-msb')
-%     c = uint8(bi2de(de2bi(dy), 'left-msb'))
-%     e = typecast(uint8(bi2de(de2bi(dy), 'left-msb')), 'int8')
-%     end
-%     dy = typecast(uint8(bi2de(de2bi(dy), 'left-msb')), 'int8');
+    dx = twosComplementDecoderInt8(data(idx(i)+2));
+    dy = twosComplementDecoderInt8(data(idx(i)+3));
+
     switch thisChannel
         case 1
             mouse1.dx = [mouse1.dx dx];
@@ -63,12 +52,28 @@ for i = 1:length(idx)
 end
 end
 
+function x = twosComplementDecoderInt8(x)
+% This is written to decode the int8 type number after receive the binary
+% data, e.g. a int8 number packed in python send to matlab. Why this is
+% necessay? If you use matlab int8 command to decode, you will find all
+% negative value become 127. Unlike most of other computer languages like C
+% and phython, when Matlab define int8, int8(2^7) = 127 instead of -128. 
+% Similary, it maps machine negative value all to 127. Due to this
+% difference in int8 definition, I have to decode the binary by ourself.
+x = uint8(x); % use unsigned int8
+if bitand(x, 128) == 128 % first check the sign, because 128 = [1 0 0 0 0 0 0 0]
+    % any negative value x (first digit is 1) will make (bitand(x,128) =
+    % 128, but positive x will not give 128.
+    x = bitand(x, 127); % 127 = [0 1 1 1 1 1 1 1] it only change the first digits to 0
+    x = bitxor(x, 127)+1; % the definition of 2 complements
+    x = -int8(x); % put back negative sign
+end
+end
+
 function d = computeDisplacement(mouse1, mouse2)
 % For current application for 1-dimenstion movement, only mouse1.dx data is
 % useful. Feel free to add cases for other applications.
-x = mouse1.dx
-d = mouse1.dy
-
+d = mouse1.dy;
 end
 
 

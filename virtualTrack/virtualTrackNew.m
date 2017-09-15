@@ -8,7 +8,7 @@ function mouse = virtualTrackNew(table_track,mouse,save_run)
 % Modified: SRO - 5/23/12 - 6/8/12
 % Modified: AR - 7/24/13 - Changed assessLED(run,obj)
 
-
+tic
 
 if nargin < 1 || isempty(table_track)
     % Choose track struct
@@ -79,7 +79,7 @@ KbName('UnifyKeyNames')
 session_active = 1;
 
 putvar(run);
-
+count = 1;
 try
     % HideCursor
     while session_active
@@ -98,7 +98,6 @@ try
         
         % --- PRE-TRIAL BEGINS --- %
         while session_active && (run.trial_number-1 < run.number_of_trials)
-            
             % Terminate session is reward limit has been reached
             if run.n_rewards >= run.reward_limit
                 session_active = 0;
@@ -181,9 +180,12 @@ try
                 % Compute new position and distance travelled
 
                 flag=0;
+                tic
                 while ~flag
                     [run,flag] = computePosition(ai,run);
                 end
+                run.debugTime(count) = toc;
+                count = count+1;
                 
                 %                 disp(['p = ' num2str(run.p)]);
                 %                 toc(run.tic_update)
@@ -222,12 +224,13 @@ try
                 % Compute and execute reward and output contingencies
                 run = computeContingencies(run,ai);
                 run.tic_hold_time = tic;
-                %                  toc(run.tic_update)
+                % toc(run.tic_update)
                 
                 % Wait for update interval
                 %waitForUpdateInterval(run);
-                pause(0.033);    
-                
+
+                pause(0.033);
+               
                 % Keyboard check
                 session_active = keyCheck(session_active);
                 
@@ -475,15 +478,16 @@ else
     
     if run.runningBall
         d = getBallMovement(run);
+        %d(abs(d) > 1) = NaN; %discontinuity_thresh = 1 pixel
         d = sum(d)/8*gain;
     else % running disk
         d = d(:,1);  %  Chn0/Ind1 is absolute position encoder
-            % Compute distance traveled in pixels
+        % Compute distance traveled in pixels
         d = diff(d);
-    
-    d(abs(d) > discontinuity_thresh) = NaN;
-    d = nansum(d);
-    d = d*run.cm_per_volt*run.pixels_per_cm*gain;
+        
+        d(abs(d) > discontinuity_thresh) = NaN;
+        d = nansum(d);
+        d = d*run.cm_per_volt*run.pixels_per_cm*gain;
     end
      
     %run.p_raw is raw position, while run.p controls stimulus. These are
@@ -958,7 +962,8 @@ if run.runningBall
         
         % If valid upd doesn't exist create it
         if bnewudp
-            u_ball = udp(rdef.rpi_IP,8888,'LocalPort',9094,'timeout', 0.0001, 'DatagramTerminateMode','off','timeout',0.001); %,'inputbuffersize',1200,'outputbuffersize',1200);
+            u_ball = udp(rdef.rpi_IP,8888,'LocalPort',9094, ...
+                'InputBufferSize', 1024,'DatagramTerminateMode','on');
             u_ball.Tag = 'udp_ball_conditions'; % Tag for finding object later
         end
         

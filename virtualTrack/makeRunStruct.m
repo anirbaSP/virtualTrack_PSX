@@ -7,8 +7,6 @@ function run = makeRunStruct(vtrack_table,mouse)
 
 % Created: SRO - 6/8/12
 
-
-
 % Screen defaults
 sdef = screenDefs;
 

@@ -79,7 +79,7 @@ KbName('UnifyKeyNames')
 session_active = 1;
 
 putvar(run);
-count = 1;
+% count = 1;
 try
     % HideCursor
     while session_active
@@ -160,6 +160,7 @@ try
             
             % Clear data from ai device
             clearDaq(ai,run);
+            % PSX to do: clear udp data?
             
             % Keyboard check
             session_active = keyCheck(session_active);
@@ -184,8 +185,8 @@ try
                 while ~flag
                     [run,flag] = computePosition(ai,run);
                 end
-                run.debugTime(count) = toc;
-                count = count+1;
+%                 run.debugTime(count) = toc;
+%                 count = count+1;
                 
                 %                 disp(['p = ' num2str(run.p)]);
                 %                 toc(run.tic_update)
@@ -648,9 +649,12 @@ end
 
 time_hold = run.trial(run.trial_number).time_hold_for_reward;
 
-lick_flag = sum(run.l_data > run.lick_thr) > 10; % run.l_data has 60 data points (to-be-confirmed), sampling rate 1000, so lick for at least 10ms
-
-if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_zone > time_hold %lick_flag %
+lick_flag = sum(run.l_data > run.lick_thr);
+% if lick_flag > 0
+%     lick_flag
+% end % run.l_data has 60 data points (after check I found that it can be more than that), sampling rate 1000, so lick for at least 10ms
+lick_flag = lick_flag >10;
+if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_zone > time_hold && lick_flag %
     %     run.time_in_reward_zone
     %     tic
     %putvalue(run.lick_port.parentuddobj,1,1);

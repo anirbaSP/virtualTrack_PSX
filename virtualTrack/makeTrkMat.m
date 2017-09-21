@@ -22,7 +22,9 @@ trk_m = trk_m*trk.background_pix_value;
 
 % Add objects to track
 for i = 1:length(obj)
+    tic
     trk_m = addObjectToTrack(trk_m,obj(i));
+    tmp(i) = toc;
 end
 
 % trk_m = single(trk_m);

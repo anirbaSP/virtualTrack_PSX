@@ -11,6 +11,7 @@ function trk_m = addObjectToTrack(trk_m,obj)
 
 rect = obj.rect;
 
+tic
 switch obj.type
     
     case 1  % square
@@ -29,7 +30,7 @@ switch obj.type
             rect = round(obj.rect + [-1 -1 1 1]*add_pix);    % ** to do: store updated obj.rect           
             tmp = double(tmp);
         end
-        
+toc        
         
     case 2  % circle
         tmp = Circle(obj.size/2);

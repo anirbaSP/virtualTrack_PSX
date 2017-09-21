@@ -160,7 +160,8 @@ try
             
             % Clear data from ai device
             clearDaq(ai,run);
-            % PSX to do: clear udp data?
+            % PSX: flush udp data
+            flushinput(run.u_ball)
             
             % Keyboard check
             session_active = keyCheck(session_active);
@@ -253,8 +254,8 @@ try
             % Begin inter-trial interval
             tic_iti_start = tic;
             
-            % Save data from last trial
-            saveRunData(run,mouse);
+            % Save data from last tri            saveRunData(run,mouse);
+            toc(tic_iti_start)
             
             % Save diode data %AR
 %             diode_data=run.diode_data;
@@ -1003,9 +1004,6 @@ if run.runningBall
 %         receiveThread.Start();
        end
     end
-    
-    % flush udp port
-    flushinput(u_ball);
     
     run.u_ball = u_ball;
 end

@@ -32,7 +32,7 @@ idx = strfind(data, 'M');
 if isempty(idx)
     return
 end
-if idx(end)+3 > length(data)
+if idx(end)+3 > length(data)-idx(1)+1
     idx(end) = [];
 end
 

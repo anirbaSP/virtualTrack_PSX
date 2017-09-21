@@ -967,7 +967,7 @@ if run.runningBall
         % If valid upd doesn't exist create it
         if bnewudp
             u_ball = udp(rdef.rpi_IP,8888,'LocalPort',9094, ...
-                'InputBufferSize', 1024,'DatagramTerminateMode','on');
+                'InputBufferSize', 4096,'DatagramTerminateMode','on');
             u_ball.Tag = 'udp_ball_conditions'; % Tag for finding object later
         end
         

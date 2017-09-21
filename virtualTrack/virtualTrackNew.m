@@ -481,6 +481,8 @@ else
         d = getBallMovement(run);
         %d(abs(d) > 1) = NaN; %discontinuity_thresh = 1 pixel
         d = sum(d)/8*gain;
+        run.last5d = [run.last5d(2:5) d]; % update the last 5 displacement
+        d = nanmean(run.last5d); % average the last5d to smooth movement
     else % running disk
         d = d(:,1);  %  Chn0/Ind1 is absolute position encoder
         % Compute distance traveled in pixels
@@ -654,7 +656,15 @@ lick_flag = sum(run.l_data > run.lick_thr);
 %     lick_flag
 % end % run.l_data has 60 data points (after check I found that it can be more than that), sampling rate 1000, so lick for at least 10ms
 lick_flag = lick_flag >10;
-if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_zone > time_hold && lick_flag %
+
+if ~lick_flag
+   water_flag = rand < run.autoWater;
+else
+    water_flag = true;
+end
+    
+
+if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_zone > time_hold && water_flag %
     %     run.time_in_reward_zone
     %     tic
     %putvalue(run.lick_port.parentuddobj,1,1);
@@ -671,7 +681,12 @@ if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_z
     obj.reward_available = 0;
     
     run.n_rewards = run.n_rewards + 1;
-    disp(['rewards = ' num2str(run.n_rewards)])
+    if lick_flag
+        run.n_rewards_lick = run.n_rewards_lick +1;
+    end
+    
+    disp(['rewards = ' num2str(run.n_rewards) '   lickOrNot ' num2str(lick_flag) '   Lick rate = ' num2str(run.n_rewards_lick/run.n_rewards)])
+    run.reward_data(run.n_rewards).lick = lick_flag;
     run.reward_data(run.n_rewards).time_in_session = toc(run.tic_session_start);
     run.reward_data(run.n_rewards).time_in_trial = toc(run.tic_trial_start);
     run.reward_data(run.n_rewards).trial_number = run.trial_number;
@@ -988,6 +1003,9 @@ if run.runningBall
 %         receiveThread.Start();
        end
     end
+    
+    % flush udp port
+    flushinput(u_ball);
     
     run.u_ball = u_ball;
 end

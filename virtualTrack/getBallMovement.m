@@ -6,7 +6,7 @@ function d = getBallMovement(run)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get udp line and read udp data
 data = [];
-udpStart = tic;
+% udpStart = tic;
 while get(run.u_ball, 'BytesAvailable') > 3
     tmp = fscanf(run.u_ball);
     data = [data tmp];

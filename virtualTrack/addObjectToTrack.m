@@ -1,4 +1,4 @@
-function trk_m = addObjectToTrack(trk_m,obj)
+function trk_m = addObjectToTrack(trk_m,obj,objPool)
 %
 %
 %
@@ -11,26 +11,30 @@ function trk_m = addObjectToTrack(trk_m,obj)
 
 rect = obj.rect;
 
-tic
 switch obj.type
     
     case 1  % square
-        tmp = ones(obj.size);
-        
-        if isfield(obj,'angle')
-            tmp = single(tmp);
-            if ~obj.angle == 0
-                tmp = imrotate(tmp,obj.angle);
-                size_tmp = size(tmp);
-                add_pix = (size_tmp(1) - obj.size(1))/2;
+        if argin > 3 % added by PSX to avoid calling the time consuming mkGrating for repeating object
+            idx = find([objPool.angle] == obj.angle);
+            tmp = objPool(idx).tmp;
+            rect = objPool(idx).rect;
+        else
+            tmp = ones(obj.size);
+            
+            if isfield(obj,'angle')
+                tmp = single(tmp);
+                if ~obj.angle == 0
+                    tmp = imrotate(tmp,obj.angle);
+                    size_tmp = size(tmp);
+                    add_pix = (size_tmp(1) - obj.size(1))/2;
+                    rect = round(obj.rect + [-1 -1 1 1]*add_pix);    % ** to do: store updated obj.rect
+                end
+                tmp=mkGrating(obj.size,obj.background_pix_val,obj.angle,obj.contrast);
+                add_pix = (size(tmp,1) - obj.size(1))/2;
                 rect = round(obj.rect + [-1 -1 1 1]*add_pix);    % ** to do: store updated obj.rect
+                tmp = double(tmp);
             end
-            tmp=mkGrating(obj.size,obj.background_pix_val,obj.angle,obj.contrast);
-            add_pix = (size(tmp,1) - obj.size(1))/2;
-            rect = round(obj.rect + [-1 -1 1 1]*add_pix);    % ** to do: store updated obj.rect           
-            tmp = double(tmp);
         end
-toc        
         
     case 2  % circle
         tmp = Circle(obj.size/2);

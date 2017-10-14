@@ -18,15 +18,11 @@ for i = 1:length(angle)
     this_size = obj(1).size;
     this_background_pix_val = obj(1).background_pix_val;
     this_contrast = obj(1).contrast;
-    this_rect = obj(1).rect;
     
     tmp = mkGrating(this_size,this_background_pix_val,this_angle,this_contrast);
-    add_pix = (size(tmp,1) - this_size(1))/2;
-    rect = round(this_rect + [-1 -1 1 1]*add_pix);
     tmp = double(tmp);
     
     objPool(i).tmp = tmp;
-    objPool(i).rect = rect;
     objPool(i).angle = this_angle;
     objPool(i).size = this_size;
     objPool(i).background_pix_val = this_background_pix_val;

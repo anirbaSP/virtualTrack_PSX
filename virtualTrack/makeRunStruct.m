@@ -44,10 +44,11 @@ run.led_state = [0 0];
 run.use_led = str2num(getFromTable(vtrack_table,'LED'));
 
 % added by PSX 08/2017
+run.use_diode = 0;
 run.lick_thr = 1; %1V 
 run.runningBall = true;
 if run.runningBall
-    run.last5d = nan(1,5);
+    run.last10d = nan(1,10);
 end
 
 run.n_rewards_lick = 0;
@@ -66,7 +67,7 @@ run.tled=nan;
 run.diode=nan;
 
 num_objects=str2num(getFromTable(vtrack_table,'Number of objects'));
-
+run.num_objects = num_objects;
 
 run.lick_port_cal = loadvar('C:\Users\Arbora\Documents\MATLAB\lick_cal.mat');
 
@@ -126,7 +127,7 @@ run.diode_data=single(run.diode_data);
 
 % --- Set up struct for storing reward times
 
-fld = {'time_in_session','time_in_trial','trial_number','position','target_object','hold_time'};
+fld = {'lick', 'time_in_session','time_in_trial','trial_number','position','target_object','hold_time'};
 for i = 1:length(fld)
     run.reward_data.(fld{i}) = single(NaN(run.reward_limit,1));
 end

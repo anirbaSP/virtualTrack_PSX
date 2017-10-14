@@ -3,7 +3,7 @@ function mouse = virtualTrackNew(table_track,mouse,save_run)
 %
 %
 %
-
+%
 % Created: SRO - 3/31/12
 % Modified: SRO - 5/23/12 - 6/8/12
 % Modified: AR - 7/24/13 - Changed assessLED(run,obj)
@@ -30,7 +30,7 @@ temp_t=[];
 temp_d=[];
 
 
-% --- Make 'run' and 'track' structs
+% --- Make 'run' and 'track' struct
 run = makeRunStruct(table_track,mouse);
 run.save_run = save_run;
 run.session_start_time = datestr(now);
@@ -97,6 +97,7 @@ try
         session_active = keyCheck(session_active);
         
         % --- PRE-TRIAL BEGINS --- %
+        current_n_reward = 0;
         while session_active && (run.trial_number-1 < run.number_of_trials)
             % Terminate session is reward limit has been reached
             if run.n_rewards >= run.reward_limit
@@ -161,7 +162,9 @@ try
             % Clear data from ai device
             clearDaq(ai,run);
             % PSX: flush udp data
-            flushinput(run.u_ball)
+            if run.runningBall
+                flushinput(run.u_ball)
+            end
             
             % Keyboard check
             session_active = keyCheck(session_active);
@@ -207,12 +210,17 @@ try
 %                 run.diode_data(1:run.n,run.update_index,3)=run.t;
                 
                 %Store led trigger and photodiode data - AR added this
-                c_obj_ind = run.p_mat(5,run.p);
-                if ~any(run.trial(run.trial_number).tled==run.tled) && isnan(run.trial(run.trial_number).tled(c_obj_ind))
-                   run.trial(run.trial_number).tled(c_obj_ind)= run.tled;
+                if run.use_led 
+                    c_obj_ind = run.p_mat(5,run.p);
+                    if ~any(run.trial(run.trial_number).tled==run.tled) && isnan(run.trial(run.trial_number).tled(c_obj_ind))
+                        run.trial(run.trial_number).tled(c_obj_ind)= run.tled;
+                    end
                 end
-                if ~any(run.trial(run.trial_number).tdiode==run.diode) && isnan(run.trial(run.trial_number).tdiode(c_obj_ind))
-                   run.trial(run.trial_number).tdiode(c_obj_ind)= run.diode;
+                if run.use_diode
+                    c_obj_ind = run.p_mat(5,run.p);
+                    if ~any(run.trial(run.trial_number).tdiode==run.diode) && isnan(run.trial(run.trial_number).tdiode(c_obj_ind))
+                        run.trial(run.trial_number).tdiode(c_obj_ind)= run.diode;
+                    end
                 end
 
                 % Send pulse for syncing daq
@@ -272,6 +280,7 @@ try
             
             % Keyboard check
             session_active = keyCheck(session_active);
+            current_n_reward = run.n_rewards;
             
         end  % Session ends
         
@@ -482,8 +491,8 @@ else
         d = getBallMovement(run);
         %d(abs(d) > 1) = NaN; %discontinuity_thresh = 1 pixel
         d = sum(d)/8*gain;
-        run.last5d = [run.last5d(2:5) d]; % update the last 5 displacement
-        d = nanmean(run.last5d); % average the last5d to smooth movement
+        run.last10d = [run.last10d(2:10) d]; % update the last 5 displacement
+        d = nanmean(run.last10d); % average the last5d to smooth movement
     else % running disk
         d = d(:,1);  %  Chn0/Ind1 is absolute position encoder
         % Compute distance traveled in pixels
@@ -501,17 +510,15 @@ else
     
     if abs(d) > (noise_threshold*gain/0.2)
         % Compute new position
-        p = fix(p - d);
+        p = fix(p + d);
         p = mod(p,run.trial(run.trial_number).trk.length);
         
-        p_raw = fix(p_raw - d);
+        p_raw = fix(p_raw + d);
         p_raw = mod(p_raw,run.trial(run.trial_number).trk.length);
         
     else
         d = 0;
     end
-    
-
     
     if run.freeze_state>0
         if abs(d) > noise_threshold
@@ -535,15 +542,18 @@ else
     run.distance = run.distance + d;
     
     % check photodiode if a new stimulus appeared
+    if run.use_diode
     diode=[run.pdiode; run.d_data];
     tt=[run.pt; run.t];
     
     c_obj_ind = run.p_mat(5,run.p);
+
     if isnan(run.trial(run.trial_number).tdiode(c_obj_ind))
         td=find(diode>0.21,1,'first'); %0.15
         if ~isempty(td)
             run.diode=tt(td);
         end
+    end
     end
 
 % tlast=find(diode>0.07,2,'last');
@@ -601,9 +611,10 @@ function run = computeContingencies(run,ai)
 c_obj_ind = run.p_mat(5,run.p);
 obj = run.trial(run.trial_number).trk.obj(c_obj_ind);
 % Add by PSX, for any comparison to the previous object
-if c_obj_ind < size(run.trial(run.trial_number).p1,2)
-    ind_last = c_obj_ind +1;
-else ind_last = 1;
+if c_obj_ind == 1 % size(run.trial(run.trial_number).p1,2)
+    ind_last = run.num_objects;
+else
+    ind_last = c_obj_ind -1;
 end
 obj_last = run.trial(run.trial_number).trk.obj(ind_last);
 
@@ -619,19 +630,11 @@ if run.freeze_flag
     end
 end
 
-if run.distance-run.distance_last_reward > 0.7*run.trial(run.trial_number).trk.length
+if run.distance-run.distance_last_reward > 0.7*run.trial(run.trial_number).trk.length/run.num_objects
     obj.reward_available = 1;
-    run.trial(run.trial_number).trk.obj(c_obj_ind) = obj;
+    %disp('distance to last reward is large enough')
+    run.trial(run.trial_number).trk.obj(c_obj_ind) = obj; % ??? PSX
 end
-
-% if obj.target == 0 && obj_last.target == 1
-%     fprintf(['\n obj.target is ' num2str(obj.target) '; '])
-%     fprintf(['obj_last.target is ' num2str(obj.target) '; '])
-%     %fprintf(['obj.target ~= obj_last.target is ' num2str(~isequal(obj.target, obj_last.target))])
-%     obj.target == obj_last.target
-%     fprintf(['\n obj.target class is ' class(obj.target) '; '])
-%     fprintf(['obj_last.target class is ' class(obj.target)])
-% end
 
 if (obj.angle ~= obj_last.angle) && obj.reward_available && run.p <= obj.target_zone(1) && run.p >= obj.target_zone(2)
     run.time_in_reward_zone = run.time_in_reward_zone + toc(run.tic_hold_time);
@@ -640,15 +643,15 @@ else
 end
 
 % Hold time warm up
- if run.n_rewards < 12 
-       time_hold = 0.6;
- elseif run.n_rewards < 24
-     time_hold = 0.7;
- elseif run.n_rewards < 36
-     time_hold = 0.8;
- else
-     time_hold = run.trial(run.trial_number).time_hold_for_reward;
- end
+%  if run.n_rewards < 12 
+%        time_hold = 0.6;
+%  elseif run.n_rewards < 24
+%      time_hold = 0.7;
+%  elseif run.n_rewards < 36
+%      time_hold = 0.8;
+%  else
+%      time_hold = run.trial(run.trial_number).time_hold_for_reward;
+%  end
 
 time_hold = run.trial(run.trial_number).time_hold_for_reward;
 
@@ -664,15 +667,17 @@ else
     water_flag = true;
 end
     
-
-if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_zone > time_hold && water_flag %
+if  obj.reward_available && water_flag %
+%     disp(['this object index is ' num2str(c_obj_ind) '   angle is ' num2str(obj.angle) ...
+%         '  ' num2str(obj_last.angle)])
+    if (obj.angle ~= obj_last.angle)&& run.time_in_reward_zone > time_hold
     %     run.time_in_reward_zone
     %     tic
     %putvalue(run.lick_port.parentuddobj,1,1);
     outputSingleScan(run.lick_port.dio,1); %NOT setup for LED
     %     toc
     %     tic
-   pause(run.trial(run.trial_number).solenoid_open_time);
+    pause(run.trial(run.trial_number).solenoid_open_time);
     %     toc
     %     tic
     outputSingleScan(run.lick_port.dio,0);
@@ -686,7 +691,9 @@ if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_z
         run.n_rewards_lick = run.n_rewards_lick +1;
     end
     
-    disp(['rewards = ' num2str(run.n_rewards) '   lickOrNot ' num2str(lick_flag) '   Lick rate = ' num2str(run.n_rewards_lick/run.n_rewards)])
+    disp(['rewards = ' num2str(run.n_rewards) '   lickOrNot ' num2str(lick_flag) ...
+        '   Lick rate = ' num2str(run.n_rewards_lick/run.n_rewards) ...
+        '   object Index = ' num2str(c_obj_ind)])
     run.reward_data(run.n_rewards).lick = lick_flag;
     run.reward_data(run.n_rewards).time_in_session = toc(run.tic_session_start);
     run.reward_data(run.n_rewards).time_in_trial = toc(run.tic_trial_start);
@@ -699,6 +706,7 @@ if (obj.angle ~= obj_last.angle) && obj.reward_available && run.time_in_reward_z
     
     run.time_in_reward_zone = 0;
     clearDaq(ai,run);
+    end
 end
 
 function run = assessLED(run,obj)
@@ -983,14 +991,15 @@ if run.runningBall
         % If valid upd doesn't exist create it
         if bnewudp
             u_ball = udp(rdef.rpi_IP,8888,'LocalPort',9094, ...
-                'InputBufferSize', 4096,'DatagramTerminateMode','on');
+                'InputBufferSize', 4096,'DatagramTerminateMode','on', ...
+                'OutputBufferSize', 10);
             u_ball.Tag = 'udp_ball_conditions'; % Tag for finding object later
         end
         
         if ~isequal(u_ball.Status,'open');
             fopen(u_ball);
             fprintf(u_ball, '%s', 'start'); % send the start command
-            
+            display('start to rpi is sent')
 %         rpiEndPoint = new IPEndPoint(IPAddress.Parse(rpi.Split(';')[1]), int.Parse(rpi.Split(';')[0]));
 % 
 % 		//rpiEndPoint = new IPEndPoint(IPAddress.Parse("169.230.188.46"),8888);

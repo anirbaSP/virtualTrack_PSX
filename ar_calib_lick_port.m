@@ -1,4 +1,4 @@
-%%% Water port calibration. AR on June 14, 2013
+ %%% Water port calibration. AR on June 14, 2013
 
 %generate lick_cal.volume values - check 3 times for fluctuations
 lick_cal.open_time=[0.0100 0.0200 0.0400 0.0600 0.0800 0.1000];

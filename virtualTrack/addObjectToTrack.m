@@ -14,10 +14,11 @@ rect = obj.rect;
 switch obj.type
     
     case 1  % square
-        if argin > 3 % added by PSX to avoid calling the time consuming mkGrating for repeating object
+        if nargin > 2 % added by PSX to avoid calling the time consuming mkGrating for repeating object
             idx = find([objPool.angle] == obj.angle);
             tmp = objPool(idx).tmp;
-            rect = objPool(idx).rect;
+            add_pix = (size(tmp,1) - obj.size(1))/2;
+            rect = round(obj.rect + [-1 -1 1 1]*add_pix);
         else
             tmp = ones(obj.size);
             

@@ -13,7 +13,7 @@ virus_list = {
     'AAV2/1.CAG.ArchT-GFP',
     'AAV2/9.flex.CBA.Arch-GFP.W.SV40',
     'AAV2/1.flex.CBA.Arch-GFP.W.SV40',
-    };
+    'none'};
 
 [s,v] = listdlg('PromptString','Select virus:','ListSize',[250 250],...
     'ListString',virus_list);

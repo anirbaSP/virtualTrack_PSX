@@ -87,7 +87,7 @@ for i = 1:run.number_of_trials
     run.trial(i).iti = str2num(getFromTable(vtrack_table,'Inter-trial interval'));
     
     % Reward parameters
-    run.trial(i).reward_volume = 12; %str2num(getFromTable(vtrack_table,'Reward volume'));
+    run.trial(i).reward_volume = str2num(getFromTable(vtrack_table,'Reward volume'));
     run.trial(i).time_hold_for_reward = str2num(getFromTable(vtrack_table,'Hold for reward'));
     
     % LED paramters

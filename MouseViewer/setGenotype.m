@@ -21,7 +21,7 @@ genotype_list = {
     'tdTomato',         % name?
     'GAD67-GFP',
     'Gad-ChR2'
-    };
+    'CaMK2a-GCaMP6s'};
 
 [s,v] = listdlg('PromptString','Select genotype:','ListSize',[180 300],...
     'ListString',genotype_list);

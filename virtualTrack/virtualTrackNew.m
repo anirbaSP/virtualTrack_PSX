@@ -107,7 +107,7 @@ try
             % --- Make Track
             run = makeTrkTextures(run);
             
-            % Set solenoid open time
+            % Set solenoid open time            
             run = computeSolenoidOpenTime(run);
             
             % --- Set trial specific parameters
@@ -655,7 +655,7 @@ end
 
 time_hold = run.trial(run.trial_number).time_hold_for_reward;
 
-lick_flag = sum(run.l_data > run.lick_thr);
+lick_flag = sum(run.l_data < run.lick_thr);
 % if lick_flag > 0
 %     lick_flag
 % end % run.l_data has 60 data points (after check I found that it can be more than that), sampling rate 1000, so lick for at least 10ms

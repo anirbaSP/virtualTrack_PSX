@@ -53,6 +53,7 @@ end
 
 run.n_rewards_lick = 0;
 run.autoWater = 1;
+run.task = getFromTable(vtrack_table, 'task');
 
 %AR added this
 run.freeze_flag=0;

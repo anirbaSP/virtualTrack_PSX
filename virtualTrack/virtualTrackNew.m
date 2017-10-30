@@ -636,7 +636,14 @@ if run.distance-run.distance_last_reward > 0.7*run.trial(run.trial_number).trk.l
     run.trial(run.trial_number).trk.obj(c_obj_ind) = obj; % ??? PSX
 end
 
-if (obj.angle ~= obj_last.angle) && obj.reward_available && run.p <= obj.target_zone(1) && run.p >= obj.target_zone(2)
+switch run.task
+    case 'discrimination'
+        taskCond = obj.target;
+    case 'mismatch'
+        taskCond = obj.angle ~= obj_last.angle;
+end
+
+if taskCond && obj.reward_available && run.p <= obj.target_zone(1) && run.p >= obj.target_zone(2)
     run.time_in_reward_zone = run.time_in_reward_zone + toc(run.tic_hold_time);
 else
     run.time_in_reward_zone = 0;
@@ -670,7 +677,7 @@ end
 if  obj.reward_available && water_flag %
 %     disp(['this object index is ' num2str(c_obj_ind) '   angle is ' num2str(obj.angle) ...
 %         '  ' num2str(obj_last.angle)])
-    if (obj.angle ~= obj_last.angle)&& run.time_in_reward_zone > time_hold
+    if taskCond && run.time_in_reward_zone > time_hold
     %     run.time_in_reward_zone
     %     tic
     %putvalue(run.lick_port.parentuddobj,1,1);

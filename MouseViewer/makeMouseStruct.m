@@ -19,6 +19,7 @@ if new_mouse
     mouse.genotype = setGenotype();
     mouse.birth = setBirth();
     mouse.virus = setVirus();
+    mouse.task = setTask();
     
     %
     mouse.cage_number = '';
@@ -32,6 +33,7 @@ if new_mouse
     mouse.mass_current = '';
     mouse.cage_mates = '';
     mouse.purpose = '';
+    
     
 else
     
